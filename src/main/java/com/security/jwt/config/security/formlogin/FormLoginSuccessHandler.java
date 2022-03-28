@@ -1,7 +1,6 @@
-package com.security.jwt.config.security.handler;
+package com.security.jwt.config.security.formlogin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.security.jwt.config.security.authentication.PostAuthentication;
 import com.security.jwt.config.security.dto.JwtTokenDto;
 import com.security.jwt.util.jwt.JwtProvider;
 import java.io.IOException;

@@ -1,6 +1,6 @@
-package com.security.jwt.config.security;
+package com.security.jwt.config.security.jwtauth;
 
-import com.security.jwt.config.security.authentication.PostAuthentication;
+import com.security.jwt.config.security.formlogin.PostAuthentication;
 import com.security.jwt.util.jwt.JwtProvider;
 import java.io.IOException;
 import javax.servlet.FilterChain;

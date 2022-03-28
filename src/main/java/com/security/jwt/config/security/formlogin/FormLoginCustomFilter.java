@@ -1,7 +1,6 @@
-package com.security.jwt.config.security.filter;
+package com.security.jwt.config.security.formlogin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.security.jwt.config.security.authentication.PreAuthentication;
 import com.security.jwt.config.security.dto.LoginDto;
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -9,8 +8,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;

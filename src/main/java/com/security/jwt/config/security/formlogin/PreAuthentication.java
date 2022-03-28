@@ -1,4 +1,4 @@
-package com.security.jwt.config.security.authentication;
+package com.security.jwt.config.security.formlogin;
 
 import com.security.jwt.config.security.dto.LoginDto;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

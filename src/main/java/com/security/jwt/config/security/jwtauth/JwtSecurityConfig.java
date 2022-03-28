@@ -1,4 +1,4 @@
-package com.security.jwt.config.security;
+package com.security.jwt.config.security.jwtauth;
 
 import com.security.jwt.util.jwt.JwtProvider;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;

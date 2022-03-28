@@ -1,4 +1,4 @@
-package com.security.jwt.config.security;
+package com.security.jwt.config.security.jwtauth;
 
 import java.io.IOException;
 import javax.servlet.ServletException;

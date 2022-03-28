@@ -1,7 +1,5 @@
-package com.security.jwt.config.security.provider;
+package com.security.jwt.config.security.formlogin;
 
-import com.security.jwt.config.security.authentication.PostAuthentication;
-import com.security.jwt.config.security.authentication.PreAuthentication;
 import com.security.jwt.config.security.service.CustomUserDetailService;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;

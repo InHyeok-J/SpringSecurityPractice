@@ -1,12 +1,12 @@
 package com.security.jwt.config;
 
-import com.security.jwt.config.security.JwtAccessDeniedHandler;
-import com.security.jwt.config.security.JwtAuthenticationEntryPoint;
-import com.security.jwt.config.security.JwtSecurityConfig;
-import com.security.jwt.config.security.filter.FormLoginCustomFilter;
-import com.security.jwt.config.security.handler.FormLoginFailureHandler;
-import com.security.jwt.config.security.handler.FormLoginSuccessHandler;
-import com.security.jwt.config.security.provider.FormLoginProvider;
+import com.security.jwt.config.security.jwtauth.JwtAccessDeniedHandler;
+import com.security.jwt.config.security.jwtauth.JwtAuthenticationEntryPoint;
+import com.security.jwt.config.security.jwtauth.JwtSecurityConfig;
+import com.security.jwt.config.security.formlogin.FormLoginCustomFilter;
+import com.security.jwt.config.security.formlogin.FormLoginFailureHandler;
+import com.security.jwt.config.security.formlogin.FormLoginSuccessHandler;
+import com.security.jwt.config.security.formlogin.FormLoginProvider;
 import com.security.jwt.util.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
