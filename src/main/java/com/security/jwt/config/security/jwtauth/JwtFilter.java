@@ -50,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
       return bearerToken.substring(HEADER_PREFIX.length());
     } else {
-      throw new RuntimeException("Header에 token이 없습니다.");
+      throw new JwtException("Header에 token이 없습니다.");
     }
   }
 }

@@ -18,6 +18,8 @@ public class JwtSecurityConfig extends
   @Override
   public void configure(HttpSecurity http) {
     JwtFilter customFilter = new JwtFilter(jwtProvider);
+    JwtExceptionFilter jwtExceptionFilter = new JwtExceptionFilter();
     http.addFilterAfter(customFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtExceptionFilter, JwtFilter.class);
   }
 }
