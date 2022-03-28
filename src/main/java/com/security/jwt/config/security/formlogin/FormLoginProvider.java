@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,7 +35,7 @@ public class FormLoginProvider implements AuthenticationProvider {
     }
 
     //인증 실패시
-    throw new NoSuchElementException("인증 정보가 정확하지 않습니다.");
+    throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
   }
 
   @Override

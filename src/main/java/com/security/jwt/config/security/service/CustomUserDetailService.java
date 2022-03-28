@@ -5,6 +5,7 @@ import com.security.jwt.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;

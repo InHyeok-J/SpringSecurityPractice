@@ -18,7 +18,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException authException) throws IOException, ServletException {
-    log.info("인증 실패");
+    log.info("인증 실패" + authException.getMessage() + " " + authException.hashCode());
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 실패용");
