@@ -41,7 +41,7 @@ public class FormLoginCustomFilter extends AbstractAuthenticationProcessingFilte
     LoginDto loginRequest = new ObjectMapper().readValue(body,
         LoginDto.class
     );
-    
+
     PreAuthentication token = new PreAuthentication(loginRequest);
     return super.getAuthenticationManager().authenticate(token);
   }
