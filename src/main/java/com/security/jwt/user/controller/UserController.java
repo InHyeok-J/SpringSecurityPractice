@@ -1,5 +1,7 @@
 package com.security.jwt.user.controller;
 
+import com.security.jwt.config.security.LoginUser;
+import com.security.jwt.config.security.dto.AuthUser;
 import com.security.jwt.user.dto.UserCreateRequest;
 import com.security.jwt.user.dto.UserResponse;
 import com.security.jwt.user.service.UserService;
@@ -37,5 +39,13 @@ public class UserController {
     System.out.println(authentication.getAuthorities());
     return ResponseEntity.status(HttpStatus.OK)
         .body("SUCCESS!");
+  }
+
+  @GetMapping("/info-aop")
+  public ResponseEntity<?> userInfoAop(@LoginUser AuthUser user) {
+    System.out.println(user.getEmail());
+    System.out.println(user.getAuthority());
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new UserResponse(1L, user.getEmail(), "닉네임 아직 모름"));
   }
 }
