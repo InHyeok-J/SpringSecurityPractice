@@ -156,7 +156,7 @@ public class FormLoginProvider implements AuthenticationProvider {
     }
 
     //인증 실패시
-    throw new NoSuchElementException("인증 정보가 정확하지 않습니다.");
+    throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
   }
 
   @Override
@@ -204,15 +204,118 @@ public class CustomUserDetailService implements UserDetailsService {
 
 지금까지 설정한 Filter는 UsernamePasswordAuthenticationFilter 앞에 설정.
 
+### FormLogin Exception Handling
+
+- FormLogin의 Filter는 AuthenticationException 을 캐치하고 있다.
+- 내부적으로 호출하는 에러에 기본적으로 제공해주는 다음과 같은 AuthenticationException 종류의 예외를 사용해야 했습니다.
+- BadCredentialsException
+- UsernameNotFoundException
+- 위 2개 사용
+- 그 외에 종류들은
+- AccountExpiredException
+- CredentialsExpiredException
+- DisabledException
+- LockedException
+
 # JWT 인증
 
-.. 추후 추가 예정 (코드 구현 완료)
+- 위에서 구현한건 로그인 요청에 대한 필터이고 JWT가 포함된 request 요청이 왔을때 핸들링 해줘야 하는 필터를 구현해야 합니다.
+
+## Filter
+
+- OncePerRequestFilter을 상속받아서 구현한 JwtFilter를 구현합니다.
+- filter의 역할은 아주 간단한데, 헤더에 Jwt가 있는지 검사하고, 유효한 jwt인지 확인한 다음 SecurityContextHolder에 인증 객체를 저장하는 역할입니다.
+
+```java
+public class JwtFilter extends OncePerRequestFilter {
+
+  private static final String AUTHORIZATION_HEADER = "Authorization";
+  private static final String HEADER_PREFIX = "Bearer ";
+  private JwtProvider jwtProvider;
+
+  public JwtFilter(JwtProvider jwtProvider) {
+    this.jwtProvider = jwtProvider;
+  }
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
+    //헤더 검사
+    String jwtToken = extractToken(request);
+
+    if (jwtProvider.validateToken(jwtToken)) {
+      //유효한 Jwt토큰이면 컨텍스트에 저장
+      UserDetails userInfo = jwtProvider.getUserDetail(jwtToken);
+      Authentication authentication = new PostAuthentication(userInfo);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      log.info("Security Contexrt에 " + authentication.getPrincipal() + " 인증 정보 저장 완료");
+
+    } else {
+      log.info("유효한 JWT 토큰이 아닙니다.");
+    }
+    //다음 필터 실행
+    filterChain.doFilter(request, response);
+  }
+
+  private String extractToken(HttpServletRequest request) {
+    String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
+      return bearerToken.substring(HEADER_PREFIX.length());
+    } else {
+      throw new JwtException("Header에 token이 없습니다.");
+    }
+  }
+}
+```
+
+- SecurityContextHolder에 인증 객체를 저장하는 이유는 전역적으로 참고하기 위해서 인데
+- JwtFilter 외의 다음 Filter들이 SecurityContextHolder에 저장된 인증 객체를 보고 처리를 하고 이후에 Controller에서도 사용하기 위해서
+  입니다.
+- 이 JwtFilter는 UsernamePasswordAuthenticationFilter 기준으로 뒤에다 위치시켰고, 위의 FormLogin은 앞에 위치시켰습니다.
+
+## JWT Filter Exception Handling
+
+- 요청에 상태에 따라서 다양한 응답을 처리하고 싶은 상황인데 기존에 ExceptionTranslationFilter(맨 마지막 위치) 가 처리하는
+  AuthenticationEntryPoint와 AccessDeniedHandler로 처리하려고 했으나
+- 로직 상 인증 객체가 없기 때문에 익명 사용자용 AuthenticationException이 발생하게 되고 message가 default값이 설정됩니다.
+- 그래서 JwtFilter 앞 단에 JwtExceptionFilter를 둬서 Jwt를 검증할떄 발생하는 에러를 캐치해서 응답시켜주는 방식으로 구현했습니다.
+
+```java
+
+@Component
+public class JwtExceptionFilter extends OncePerRequestFilter {
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
+    try {
+      filterChain.doFilter(request, response);
+    } catch (JwtException e) {
+      e.printStackTrace();
+      sendResponse(response, e);
+    }
+  }
+
+  private void sendResponse(HttpServletResponse response, JwtException jwtException)
+      throws IOException {
+    ...응답 로직
+  }
+}
+```
+
+- 사용자의 요청이 들어오면 JwtExceptionFilter가 먼저 호출하게 되고 이 필터는 FilterChain.doFilte로 JwtFilter를 호출합니다.
+- 이 JwtFilter에서 발생하는 에러를 핸들링해서 각 상황에 맞는 응답을 처리합니다.
+
+# 인가 제어
+
+- 구현 예정
 
 ### 참고
 
 - https://github.com/alalstjr/Java-spring-boot-security-jwt
 - 시큐리티 문서
-- 구글링
+- https://velog.io/@ewan/Spring-security-success-failure-handler FormLogin Exception 참고
+- https://velog.io/@hellonayeon/spring-boot-jwt-expire-exception  JWT Exception 참고.
 
 ### 그 외
 
