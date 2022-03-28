@@ -32,8 +32,8 @@ public class FormLoginFailureHandler implements AuthenticationFailureHandler {
 
   private void sendResponse(HttpServletResponse response, String message) throws IOException {
     ErrorResponse errorResponse = new ErrorResponse(401, message);
-    objectMapper.getFactory().configure(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), true);
 
+    response.setCharacterEncoding("UTF-8");
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
     response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
