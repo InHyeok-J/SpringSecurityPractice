@@ -35,9 +35,9 @@ public class FormLoginCustomFilter extends AbstractAuthenticationProcessingFilte
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
       HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-    String res = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+    String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
-    LoginDto loginRequest = new ObjectMapper().readValue(res,
+    LoginDto loginRequest = new ObjectMapper().readValue(body,
         LoginDto.class
     );
     PreAuthentication token = new PreAuthentication(loginRequest);
