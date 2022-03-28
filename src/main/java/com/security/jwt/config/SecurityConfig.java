@@ -1,12 +1,13 @@
 package com.security.jwt.config;
 
+import com.security.jwt.config.security.JwtAccessDeniedHandler;
+import com.security.jwt.config.security.JwtAuthenticationEntryPoint;
+import com.security.jwt.config.security.JwtSecurityConfig;
 import com.security.jwt.config.security.filter.FormLoginCustomFilter;
-import com.security.jwt.config.security.filter.JwtAuthenticationFilter;
 import com.security.jwt.config.security.handler.FormLoginFailureHandler;
 import com.security.jwt.config.security.handler.FormLoginSuccessHandler;
 import com.security.jwt.config.security.provider.FormLoginProvider;
-import java.util.ArrayList;
-import java.util.List;
+import com.security.jwt.util.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final FormLoginSuccessHandler formLoginSuccessHandler;
   private final FormLoginFailureHandler formLoginFailureHandler;
   private final FormLoginProvider provider;
+  private final JwtProvider jwtProvider;
+  private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+  private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
   @Bean
   public AuthenticationManager getAuthenticationManger() throws Exception {
@@ -44,11 +48,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return filter;
   }
 
-  //  private JwtAuthenticationFilter jwtFilter() throws Exception{
-//    List<AntPathRequestMatcher> skipPath = new ArrayList<>();
-//
-//
-//  }
   @Override
   protected void configure(AuthenticationManagerBuilder auth) {
     auth
@@ -57,25 +56,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    //필터 등록
-    http.addFilterBefore(formLoginCustomFilter(), UsernamePasswordAuthenticationFilter.class);
-    //exception Handler
-
-    //토큰 방식을 사용하기 때문에 off 쿠키 안씀
     http
-        .csrf()
-        .disable();
-
-    //Jwt 방식을 사용할거라서 Session OFF
-    http
+        .csrf().disable()
+        //exception Handler
+        .exceptionHandling()
+        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+        .accessDeniedHandler(jwtAccessDeniedHandler)
+        //Jwt 방식을 사용할거라서 Session OFF
+        .and()
         .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-    http
+        .and()
         .authorizeRequests()
-        .antMatchers("/", "/api/user", "/jwt").permitAll() // root 조회랑 회원가입운 열어둠
-        .antMatchers("/api/user/info").authenticated();
-  }
+        .antMatchers("/api/user").permitAll() // root 조회랑 회원가입운 열어둠
+        .antMatchers("/api/login").permitAll()
+        .anyRequest().authenticated()
 
+        .and()
+        .apply(new JwtSecurityConfig(jwtProvider));
+    //Form Login 필터 등록
+    http.addFilterBefore(formLoginCustomFilter(), UsernamePasswordAuthenticationFilter.class);
+  }
 
 }

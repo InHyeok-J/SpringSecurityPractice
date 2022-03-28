@@ -13,11 +13,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -25,11 +25,11 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
   private static final String AUTHORITIES_KEY = "auth";
-  private final Long ACCESS_TOKEN_EXPIRED_TIME;
+  private final Long ACCESS_TOKEN_EXPIRED_TIME_SECOND;
   private final Key key;
 
   public JwtProvider(JwtConfigProperty jwtConfigProperty) {
-    this.ACCESS_TOKEN_EXPIRED_TIME = jwtConfigProperty.getAccess_token_expired_time();
+    this.ACCESS_TOKEN_EXPIRED_TIME_SECOND = jwtConfigProperty.getAccess_token_expired_time();
     byte[] keyByte = Decoders.BASE64.decode(jwtConfigProperty.getSecret());
     this.key = Keys.hmacShaKeyFor(keyByte);
   }
@@ -40,8 +40,8 @@ public class JwtProvider {
         .collect(Collectors.joining(","));
 
     long now = (new Date()).getTime();
-    Date accessTokenExpiredIn = new Date(now + ACCESS_TOKEN_EXPIRED_TIME);
 
+    Date accessTokenExpiredIn = new Date(now + ACCESS_TOKEN_EXPIRED_TIME_SECOND * 1000);
     String accessToken = Jwts.builder()
         .setSubject(authentication.getName())
         .setExpiration(accessTokenExpiredIn)
@@ -51,7 +51,7 @@ public class JwtProvider {
     return accessToken;
   }
 
-  public Authentication getAuthentication(String token) {
+  public UserDetails getUserDetail(String token) {
     Claims claims = Jwts
         .parserBuilder()
         .setSigningKey(key)
@@ -67,7 +67,7 @@ public class JwtProvider {
     User principal = new User(claims.getSubject(), "",
         authorities);
 
-    return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    return principal;
   }
 
   public boolean validateToken(String token) {
