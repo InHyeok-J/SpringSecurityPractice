@@ -221,6 +221,34 @@ public class CustomUserDetailService implements UserDetailsService {
 
 - 위에서 구현한건 로그인 요청에 대한 필터이고 JWT가 포함된 request 요청이 왔을때 핸들링 해줘야 하는 필터를 구현해야 합니다.
 
+## Config
+
+```java
+public class JwtSecurityConfig extends
+    SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+
+  private JwtProvider jwtProvider;
+
+  public JwtSecurityConfig(JwtProvider jwtProvider) {
+    this.jwtProvider = jwtProvider;
+  }
+
+  @Override
+  public void configure(HttpSecurity http) {
+    //에외 api 추가
+    List<AntPathRequestMatcher> skip = new ArrayList<>();
+    skip.add(new AntPathRequestMatcher("/", HttpMethod.GET.name()));
+    skip.add(new AntPathRequestMatcher("/api/login", HttpMethod.POST.name()));
+    skip.add(new AntPathRequestMatcher("/api/user", HttpMethod.POST.name()));
+
+    JwtFilter customFilter = new JwtFilter(jwtProvider, skip);
+    JwtExceptionFilter jwtExceptionFilter = new JwtExceptionFilter();
+    http.addFilterAfter(customFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtExceptionFilter, JwtFilter.class);
+  }
+}
+```
+
 ## Filter
 
 - OncePerRequestFilter을 상속받아서 구현한 JwtFilter를 구현합니다.
@@ -231,15 +259,23 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String HEADER_PREFIX = "Bearer ";
-  private JwtProvider jwtProvider;
+  private final OrRequestMatcher orRequestMatcher;
 
-  public JwtFilter(JwtProvider jwtProvider) {
+  public JwtFilter(JwtProvider jwtProvider, List<AntPathRequestMatcher> skipPath) {
     this.jwtProvider = jwtProvider;
+    this.orRequestMatcher = new OrRequestMatcher(new ArrayList<>(skipPath));
   }
+
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
+
+    if (orRequestMatcher.matches(request)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     //헤더 검사
     String jwtToken = extractToken(request);
 
@@ -272,6 +308,7 @@ public class JwtFilter extends OncePerRequestFilter {
 - JwtFilter 외의 다음 Filter들이 SecurityContextHolder에 저장된 인증 객체를 보고 처리를 하고 이후에 Controller에서도 사용하기 위해서
   입니다.
 - 이 JwtFilter는 UsernamePasswordAuthenticationFilter 기준으로 뒤에다 위치시켰고, 위의 FormLogin은 앞에 위치시켰습니다.
+- orRequestMatcher는 AntPathRequestMatcher들 중에서 하나라도 맞으면 true를 리턴하며, 이걸 통해서 검사를 하면 안되는 api를 셋팅합니다.
 
 ## JWT Filter Exception Handling
 
