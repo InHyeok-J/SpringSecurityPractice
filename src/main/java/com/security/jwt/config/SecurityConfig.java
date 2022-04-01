@@ -2,6 +2,7 @@ package com.security.jwt.config;
 
 import com.security.jwt.config.security.jwtauth.JwtAccessDeniedHandler;
 import com.security.jwt.config.security.jwtauth.JwtAuthenticationEntryPoint;
+import com.security.jwt.config.security.jwtauth.JwtFilter;
 import com.security.jwt.config.security.jwtauth.JwtSecurityConfig;
 import com.security.jwt.config.security.formlogin.FormLoginCustomFilter;
 import com.security.jwt.config.security.formlogin.FormLoginFailureHandler;
@@ -56,6 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    http.addFilterBefore(formLoginCustomFilter(), UsernamePasswordAuthenticationFilter.class);
+
     http
         .csrf().disable()
         //exception Handler
@@ -69,14 +72,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         .and()
         .authorizeRequests()
+        .antMatchers("/").permitAll()
         .antMatchers("/api/user").permitAll() // root 조회랑 회원가입운 열어둠
         .antMatchers("/api/login").permitAll()
+        .antMatchers("/api/enum").permitAll()
         .anyRequest().authenticated()
 
         .and()
         .apply(new JwtSecurityConfig(jwtProvider));
     //Form Login 필터 등록
-    http.addFilterBefore(formLoginCustomFilter(), UsernamePasswordAuthenticationFilter.class);
   }
 
 }

@@ -3,6 +3,8 @@ package com.security.jwt.config.security.jwtauth;
 import com.security.jwt.config.security.formlogin.PostAuthentication;
 import com.security.jwt.util.jwt.JwtProvider;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,14 +24,22 @@ public class JwtFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String HEADER_PREFIX = "Bearer ";
   private JwtProvider jwtProvider;
+  private final OrRequestMatcher orRequestMatcher;
 
-  public JwtFilter(JwtProvider jwtProvider) {
+  public JwtFilter(JwtProvider jwtProvider, List<AntPathRequestMatcher> skipPath) {
     this.jwtProvider = jwtProvider;
+    this.orRequestMatcher = new OrRequestMatcher(new ArrayList<>(skipPath));
   }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
+
+    if (orRequestMatcher.matches(request)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     //헤더 검사
     String jwtToken = extractToken(request);
 
