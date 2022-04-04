@@ -1,6 +1,8 @@
 package com.security.jwt.config;
 
 import com.security.jwt.config.security.LoginUserArgumentResolver;
+import com.security.jwt.constant.EnumMapper;
+import com.security.jwt.constant.UserRole;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,5 +26,12 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
     argumentResolvers.add(loginUserArgumentResolver);
+  }
+
+  @Bean
+  public EnumMapper enumMapper() {
+    EnumMapper enumMapper = new EnumMapper();
+    enumMapper.put("UserRole", UserRole.class);
+    return enumMapper;
   }
 }

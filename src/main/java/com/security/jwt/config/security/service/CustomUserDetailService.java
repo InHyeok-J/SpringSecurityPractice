@@ -34,7 +34,8 @@ public class CustomUserDetailService implements UserDetailsService {
   private org.springframework.security.core.userdetails.User createUser(String email,
       User userEntity) {
     Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-    grantedAuthorities.add(new SimpleGrantedAuthority("USER")); // DB에 아무 값도 없어서 임의로 둠.
+    grantedAuthorities.add(
+        new SimpleGrantedAuthority(userEntity.getUserRole().getRole())); // getRole => ROLE_USER
     return new org.springframework.security.core.userdetails.User(email, userEntity.getPassword(),
         grantedAuthorities);
   }

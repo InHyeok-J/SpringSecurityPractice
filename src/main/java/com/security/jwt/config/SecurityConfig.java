@@ -75,7 +75,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/").permitAll()
         .antMatchers("/api/user").permitAll() // root 조회랑 회원가입운 열어둠
         .antMatchers("/api/login").permitAll()
-        .antMatchers("/api/enum").permitAll()
+        .antMatchers("/api/enum/**").permitAll()
+        .antMatchers("/api/user/info").hasAuthority("ROLE_USER")
+        .antMatchers("/api/user/info-aop").hasRole("USER")
         .anyRequest().authenticated()
 
         .and()

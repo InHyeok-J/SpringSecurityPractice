@@ -1,7 +1,10 @@
 package com.security.jwt.user.entity;
 
+import com.security.jwt.constant.UserRole;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,6 +12,7 @@ import javax.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Table(name = "user")
@@ -28,6 +32,10 @@ public class User {
 
   @Column(name = "password")
   private String password;
+
+  @Column(name = "user_role", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private UserRole userRole = UserRole.USER;
 
   @Builder
   public User(String email, String username, String password) {

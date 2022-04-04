@@ -1,6 +1,7 @@
 package com.security.jwt.user.service;
 
 import com.security.jwt.exception.DuplicateEmailException;
+import com.security.jwt.exception.NotFountUserException;
 import com.security.jwt.user.dto.UserCreateRequest;
 import com.security.jwt.user.entity.User;
 import com.security.jwt.user.repository.UserRepository;
@@ -23,6 +24,14 @@ public class UserService {
     newUSer.setPassword(passwordEncoder.encode(dto.getPassword()));
 
     return userRepository.save(newUSer);
+  }
+
+  public User findOne(String email) {
+    Optional<User> findUser = userRepository.findByEmail(email);
+    if (findUser.isPresent()) {
+      return findUser.get();
+    }
+    throw new NotFountUserException();
   }
 
   private void checkDuplicateEmail(String email) {

@@ -25,7 +25,8 @@ public class JwtSecurityConfig extends
     skip.add(new AntPathRequestMatcher("/", HttpMethod.GET.name()));
     skip.add(new AntPathRequestMatcher("/api/login", HttpMethod.POST.name()));
     skip.add(new AntPathRequestMatcher("/api/user", HttpMethod.POST.name()));
-
+    skip.add(new AntPathRequestMatcher("/api/enum", HttpMethod.GET.name()));
+    skip.add(new AntPathRequestMatcher("/api/enum/**", HttpMethod.GET.name()));
     JwtFilter customFilter = new JwtFilter(jwtProvider, skip);
     JwtExceptionFilter jwtExceptionFilter = new JwtExceptionFilter();
     http.addFilterAfter(customFilter, UsernamePasswordAuthenticationFilter.class);

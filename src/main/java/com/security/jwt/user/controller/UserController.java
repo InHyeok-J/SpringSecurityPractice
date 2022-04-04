@@ -4,6 +4,7 @@ import com.security.jwt.config.security.LoginUser;
 import com.security.jwt.config.security.dto.AuthUser;
 import com.security.jwt.user.dto.UserCreateRequest;
 import com.security.jwt.user.dto.UserResponse;
+import com.security.jwt.user.entity.User;
 import com.security.jwt.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,19 +34,18 @@ public class UserController {
   public ResponseEntity<?> userInfo() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     System.out.println(authentication.getPrincipal());
-    System.out.println(authentication.getCredentials());
-    System.out.println(authentication.getDetails());
     System.out.println(authentication.getName());
     System.out.println(authentication.getAuthorities());
+
+    User findUser = userService.findOne(authentication.getName());
     return ResponseEntity.status(HttpStatus.OK)
-        .body("SUCCESS!");
+        .body(UserResponse.to(findUser));
   }
 
   @GetMapping("/info-aop")
   public ResponseEntity<?> userInfoAop(@LoginUser AuthUser user) {
-    System.out.println(user.getEmail());
-    System.out.println(user.getAuthority());
+    User findUser = userService.findOne(user.getEmail());
     return ResponseEntity.status(HttpStatus.OK)
-        .body(new UserResponse(1L, user.getEmail(), "닉네임 아직 모름"));
+        .body(UserResponse.to(findUser));
   }
 }
