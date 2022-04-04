@@ -345,7 +345,38 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 
 # 인가 제어
 
-- 구현 예정
+- 스프링 시큐리티에서 인가 처리는 크게 FilterSecurityInterceptor, AccessDecisionManager, AccessDecisionVoter 3개가
+  관여한다.
+- 필터들의 목록을 보면 아래와 같은데   
+  <img src="https://user-images.githubusercontent.com/28949213/161551915-9a3caf57-845c-4bd7-bf82-38c5c283eec8.png"/>
+- ExceptionTranslationFilter가 위에서 JwtFilter의 Exception을 처리한 것 처럼 try catch로 감싸서
+  FilterSecurityInterceptor에서 처리하는 예외를 받아서 핸들링을 하며 인가 처리는 FilterSecurityInterceptor 에서 처리한다.
+
+- 인가 처리 결정은 AccessDecisionManager가 처리를 하는데, 처리를 하기 위해서는 인증 정보(SpringSecurityContext에 저장된
+  Authentication 객체)와 요청 정보(AntMatcher), 권한 정보(hasRole or hasAuthority)가 필요하다
+- FilterSecurityIntercepter는 먼저 인증 정보가 있는지 체크 후 없으면 예외를, 있으면 권한 정보를 체크하며 권한 정보가 없는 자원이면 응답, 권한 정보가
+  필요한 자원이면 AccessDecisionManager에게 위임한다.
+
+### AccessDecisionManager
+
+- 위에서 말한 것처럼 권한 여부를 판단한다.
+- 여러 개의 Voter 들을 가질 수 있으며 Voter들로부터 접근 허용, 거부, 보류에 해당하는 각각의 값을 리턴 받고 판단 및 결정한다.
+- 접근 결정의 세가지 유형
+    - AffirmativeBased:
+        - 여러 개의 Voter클래스 중 하나라도 접근 허가로 결론을 내면 허가로 판단
+    - ConsensusBased :
+        - 다수표(승인 및 거부)에 의해 최종 결정을 판단
+    - UnanimousBased
+        - 모든 Voter가 만장일치로 접근을 승인해야 하며 그렇지 않은 경우 접근을 거부함.
+
+### 표현식
+
+- hasRole(String) -> 사용자가 주어진 **역할**이 있다면 허용, 검사시에 앞에 ROLE_ 라는 prefix를 붙여서 검사.ex) hasRole("USER")
+- hasAuthority(String) -> 사용자가 주어진 **권한**이 있다면 접근을 허용 , ex) hasAuthority("ROLE_USER")
+- hasAnyRole(String) -> 여러 역할 중 하나만 일치해도 허용
+- hasAnyAuthority(String) -> 여러 권한 중 하나만 일치해도 허용
+- access(String) -> 주어진 SpEL 표현식의 평가 결과가 true이면 접근을 허용 ex)access("hasRole('ADMIN') or hasRole('
+  SYS')")
 
 ### 참고
 
